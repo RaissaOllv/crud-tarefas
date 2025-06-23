@@ -1,8 +1,8 @@
-const API = 'http://localhost:3000/tarefas';
+const API = 'https://crud-tarefas.vercel.app/api/tarefas';
 const lista = document.getElementById('lista-tarefas');
 const form = document.getElementById('form-tarefa');
 const tituloInput = document.getElementById('titulo');
-const dataHoraInput = document.getElementById('dataHora'); // novo input
+const dataHoraInput = document.getElementById('dataHora');
 
 function carregarTarefas() {
   fetch(API)
@@ -39,7 +39,7 @@ function carregarTarefas() {
         });
 
         select.addEventListener('change', () => {
-          fetch(`${API}/${t.id}`, {
+          fetch(`${API}?id=${t.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: select.value })
@@ -83,7 +83,7 @@ form.addEventListener('submit', (e) => {
 });
 
 function deletar(id) {
-  fetch(`${API}/${id}`, { method: 'DELETE' }).then(carregarTarefas);
+  fetch(`${API}?id=${id}`, { method: 'DELETE' }).then(carregarTarefas);
 }
 
 carregarTarefas();
