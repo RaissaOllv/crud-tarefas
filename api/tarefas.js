@@ -1,89 +1,25 @@
-const API = 'https://crud-tarefas.vercel.app/api/tarefas';
-const lista = document.getElementById('lista-tarefas');
-const form = document.getElementById('form-tarefa');
-const tituloInput = document.getElementById('titulo');
-const dataHoraInput = document.getElementById('dataHora');
+let tarefas = [];
 
-function carregarTarefas() {
-  fetch(API)
-    .then(res => res.json())
-    .then(tarefas => {
-      lista.innerHTML = '';
-      tarefas.forEach(t => {
-        const li = document.createElement('li');
-
-        // Título da tarefa
-        const span = document.createElement('span');
-        span.textContent = t.titulo;
-
-        // Data e hora da tarefa formatada
-        const dataSpan = document.createElement('small');
-        if (t.dataHora) {
-          const data = new Date(t.dataHora);
-          dataSpan.textContent = data.toLocaleString('pt-BR', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-          });
-          dataSpan.style.marginLeft = '10px';
-          dataSpan.style.color = '#666';
-        }
-
-        // Select para status
-        const select = document.createElement('select');
-        ['Pendente', 'Concluída'].forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt;
-          option.textContent = opt;
-          if (t.status.toLowerCase() === opt.toLowerCase()) option.selected = true;
-          select.appendChild(option);
-        });
-
-        select.addEventListener('change', () => {
-          fetch(`${API}?id=${t.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: select.value })
-          }).then(carregarTarefas);
-        });
-
-        // Botão excluir
-        const btnExcluir = document.createElement('button');
-        btnExcluir.textContent = 'Excluir';
-        btnExcluir.onclick = () => deletar(t.id);
-
-        // Monta o item da lista
-        li.appendChild(span);
-        li.appendChild(dataSpan);
-        li.appendChild(select);
-        li.appendChild(btnExcluir);
-
-        lista.appendChild(li);
-      });
-    });
+export default function handler(req, res) {
+  if (req.method === 'GET') {
+    return res.status(200).json(tarefas);
+  }
+  if (req.method === 'POST') {
+    const novaTarefa = { id: Date.now(), ...req.body };
+    tarefas.push(novaTarefa);
+    return res.status(201).json(novaTarefa);
+  }
+  if (req.method === 'PUT') {
+    const { id } = req.query;
+    const index = tarefas.findIndex(t => t.id == id);
+    if (index === -1) return res.status(404).json({ message: 'Tarefa não encontrada' });
+    tarefas[index] = { ...tarefas[index], ...req.body };
+    return res.json({ message: 'Tarefa atualizada' });
+  }
+  if (req.method === 'DELETE') {
+    const { id } = req.query;
+    tarefas = tarefas.filter(t => t.id != id);
+    return res.json({ message: 'Tarefa deletada' });
+  }
+  return res.status(405).json({ message: 'Método não permitido' });
 }
-
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-
-  const nova = {
-    titulo: tituloInput.value,
-    status: 'Pendente',
-    dataHora: dataHoraInput.value
-  };
-
-  fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(nova)
-  }).then(() => {
-    tituloInput.value = '';
-    dataHoraInput.value = '';
-    carregarTarefas();
-  });
-});
-
-function deletar(id) {
-  fetch(`${API}?id=${id}`, { method: 'DELETE' }).then(carregarTarefas);
-}
-
-carregarTarefas();
