@@ -1,4 +1,4 @@
-const API = 'https://crud-tarefas.vercel.app/api/tarefas';
+const API = 'https://crud-tarefas-backend.up.railway.app/tarefas';
 const lista = document.getElementById('lista-tarefas');
 const form = document.getElementById('form-tarefa');
 const tituloInput = document.getElementById('titulo');
