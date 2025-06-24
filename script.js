@@ -1,4 +1,4 @@
-const API = 'https://crud-tarefas-backend.up.railway.app/tarefas';
+const API = 'https://crud-tarefas-backend-production.up.railway.app/tarefas';
 const lista = document.getElementById('lista-tarefas');
 const form = document.getElementById('form-tarefa');
 const tituloInput = document.getElementById('titulo');
@@ -34,12 +34,12 @@ function carregarTarefas() {
           const option = document.createElement('option');
           option.value = opt;
           option.textContent = opt;
-          if (t.status.toLowerCase() === opt.toLowerCase()) option.selected = true;
+          if (t.status && t.status.toLowerCase() === opt.toLowerCase()) option.selected = true;
           select.appendChild(option);
         });
 
         select.addEventListener('change', () => {
-          fetch(`${API}?id=${t.id}`, {
+          fetch(`${API}/${t.id}`, {  // Usando rota correta com /:id
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: select.value })
@@ -83,7 +83,8 @@ form.addEventListener('submit', (e) => {
 });
 
 function deletar(id) {
-  fetch(`${API}?id=${id}`, { method: 'DELETE' }).then(carregarTarefas);
+  fetch(`${API}/${id}`, { method: 'DELETE' })  // Usando rota correta com /:id
+    .then(carregarTarefas);
 }
 
 carregarTarefas();
